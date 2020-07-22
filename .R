@@ -1,0 +1,46 @@
+n<- 120
+Lagged.SNP = c(NA,SNP[1:(n-1)])
+Lagged.FTSE = c(NA,FTSE[1:(n-1)])
+Lagged.GDAXI = c(NA,GDAXI[1:(n-1)])
+Lagged.N225 = c(NA,N225[1:(n-1)])
+return.SNP = ((SNP-Lagged.SNP)/Lagged.SNP)*100
+return.FTSE = ((FTSE-Lagged.FTSE)/Lagged.FTSE)*100
+return.GDAXI = ((GDAXI-Lagged.GDAXI)/Lagged.GDAXI)*100
+return.N225 = ((N225-Lagged.N225)/Lagged.N225)*100
+hist(return.SNP)
+hist(return.FTSE)
+hist(return.N225)
+hist(return.GDAXI)
+plot(return.FTSE,return.SNP)
+plot(return.N225,return.SNP)
+plot(return.GDAXI,return.SNP)
+plot(Time,return.SNP)
+plot(TimeSq,return.SNP)
+IndecesR <- lm(return.SNP ~ return.FTSE + return.GDAXI + return.N225 + Time + TimeSq)
+summary(IndecesR)
+IndecesR0 <- lm(return.SNP ~ return.FTSE + return.GDAXI + return.N225 )
+summary(IndecesR0)
+library(car)
+vif(IndecesR0)
+n0 = length(stdres0)
+Time0 = 1:n0
+plot(Time0, stdres0, ylab="Standardized residuals", type="b")
+smcurve = loess.smooth(Time0, stdres0, span=.5)
+lines(smcurve)
+library(randtests)
+acf(stdres0, xlim=c(1,20), ylim=c(-.4, .5))
+runs.test(stdres0, threshold=0)
+stdres1 = rstandard(IndecesR)
+
+plot(fitted(IndecesR),stdres1,xlab="Fitted values",ylab="Standardized residuals")
+qqnorm(stdres1)
+plot(Time, stdres1, ylab="Standardized residuals", type="b")
+plot(Time0, stdres1, ylab="Standardized residuals", type="b")
+acf(stdres1, xlim=c(1,20), ylim=c(-.4, .5))
+runs.test(stdres0, threshold=0)
+cbind(stdres0, hatvalues(IndecesR0), cooks.distance(IndecesR0))
+
+library(leaps)
+leaps(cbind(return.FTSE + return.GDAXI + return.N225 + Time + TimeSq + Indices$M1 + Indices$M2 + Indices$M3 + Indices$M4 + Indices$M5 + Indices$M6 + Indices$M7 + Indices$M8 + Indices$M9 +Indices$M10 + Indices$M11)[2:n,],return.SNP[2:n],nbest=2)
+leaps(cbind( return.FTSE + return.GDAXI + return.N225 + Time + TimeSq + Indices$M1 + Indices$M2 + Indices$M3 + Indices$M4 + Indices$M5 + Indices$M6 + Indices$M7 + Indices$M8 + Indices$M9 +Indices$M10 + Indices$M11)[2:n,],return.SNP[2:n],nbest=2,method="adjr2")
+leaps(cbind( return.FTSE + return.GDAXI + return.N225 + Time + TimeSq + Indices$M1 + Indices$M2 + Indices$M3 + Indices$M4 + Indices$M5 + Indices$M6 + Indices$M7 + Indices$M8 + Indices$M9 +Indices$M10 + Indices$M11)[2:n,],return.SNP[2:n],nbest=2,method="r2")
